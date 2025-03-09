@@ -65,18 +65,15 @@
            <span style="color: red;">*</span>SELECT YOUR FIELD
           </strong></h4>
         </div>
-        <form method="post">
+        <form action="{% url 'home' %}" method="post">
           {% csrf_token %}
-        {{ job }}
-        </form>
+          {{ DetailsForm.domain }}
         </div>
         <hr id="hr" style="justify-content: center;display:flex;align-items: center; margin-right: 200px;margin-left:200px;color:blue; border-width: 2px;box-shadow: 0px 10px 15px rgba(7, 1, 23, 0.5);">
-        <form action="{% url 'home' %}" method="POST">
-          {% csrf_token %}
         <div class="discription" id="discription">
           <div class="des">
           <h5> job description :<br></h5>
-          {{ descriptions.description }}
+          {{ DetailsForm.description }}
           </div>
         </div>
         <!-- <div class="resume_area" id="resume_area">
@@ -129,6 +126,7 @@
           </div>
           </div>
           </div>
+          <form action="{% url 'home' %}" method="POST">
           {% if question %}
           <div class="card" style="width: 70rem;border :2px solid green">
             <strong class="card-header" style="background-color: rgba(67, 97, 219, 0.454);">Question</strong>
@@ -141,10 +139,11 @@
                   <form actin="">
                 <input type="file" id="audio-upload" name="audio-upload" accept="audio/*" style=" display: none;">
                 </div>
-          --><form method="POST">
+          -->
+              
                 {% csrf_token %}
               <div class="typeans">
-                 <!-- <textarea class="answeretypeopt" placeholder="Enter your Answere" id="textarea" ></textarea> -->{{ AnswerForm }}
+                 <!-- <textarea class="answeretypeopt" placeholder="Enter your Answere" id="textarea" ></textarea> -->{{ AnswereForm.user_ans }}
               </div>
               <div class="ans">
                 <input type="hidden" name="practice_id" value="{{ practice_id }}">
@@ -156,8 +155,8 @@
               </div>
               <!--card footer btn-->
               <div class="card-footer">
-                <button type="button" class="feedback" onclick="feedback()" >Feedback</button>
-                <button type="button" class="suggrstedans" onclick="answer()" >Suggested Answere</button>
+                <button type="button" class="feedback"  >Feedback</button>
+                <button type="submit" class="suggrstedans" name="action" value="sug_ans" >Suggested Answere</button>
               </div>
             </div>
           </div>
@@ -174,15 +173,16 @@
           <div class="card" style="width: 70rem; display: block;" id="answer-card">
             <strong class="card-header" style=" background-color: rgba(97, 204, 240, 0.413);">Suggested Answere</strong>
             <div class="card-body">
-              <p class="card-text"><strong>{{ sug_ans }}</strong></p>
+              <p class="card-text"><strong>{{ suggested_ans }}</strong></p>
             </div>
           </div>
           <!--ans submit button and next question button-->
           <div class="ans_submit" style="margin-top:30px;margin-bottom: 30px;  ">
-            <button type="submit" name="action" value="submit_answer" class="sub_btn_ans" id="sub" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); " onclick="feedback_ans()">Submit for AI Feedback</button>
-            <button type="submit" name="acion" value="generate_next" class="sub_btn_ans" id="next" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); display: flex;" onclick="next_ans()">Next Question</button>
-            </form>
+            <button type="submit" name="action" value="submit_answer" class="sub_btn_ans" id="sub" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); " >Submit for AI Feedback</button>
+            <button type="submit" name="action" value="generate_next" class="sub_btn_ans" id="next" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); display: flex;" >Next Question</button>
+            
           {% endif %}
+        </form>
           </div>
           </div>
      </section>
