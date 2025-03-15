@@ -13,13 +13,20 @@ class cont(models.Model):
     message=models.TextField()
     def __str__(self):
         return self.si
+
+class Job(models.Model):
+    job_title=models.CharField(max_length=50)
+    job_description=models.TextField()
+
+    def __str__(self):
+        return self.job_title
+
 class interviewprep(models.Model):
     user=models.TextField()
-    domain=models.CharField(max_length=30)
+    domain=models.CharField(max_length=50)
     description=models.TextField()
     user_ans=models.TextField()
     question=models.TextField()
     suggested_answer=models.TextField()
     feedback=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True)
-

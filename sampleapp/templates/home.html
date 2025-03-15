@@ -65,7 +65,7 @@
            <span style="color: red;">*</span>SELECT YOUR FIELD
           </strong></h4>
         </div>
-        <form action="{% url 'home' %}" method="post">
+        <form action="{% url 'home' %}" method="post" id="Gen_ques_form">
           {% csrf_token %}
           {{ DetailsForm.domain }}
         </div>
@@ -90,12 +90,12 @@
         </div>
           </div> -->
         <div class="start-btn">
-         <button type="submit" name="action" value="generate_question" id="button" onclick="start()">Generate Question</button>
+         <button type="submit" name="action" value="generate_question" id="button" >Generate Question</button>
         </div>
       </form>
       <!--area in which quesrion,feedback and sugested ans is shown this area appears only if btn-generate question is clicked-->
      <section id="area"><!--section of area-->
-        <div class="main_area" id="main_area"style="display: block;">
+        <div class="main_area" id="main_area"style="display: none;">
           <div class="stop_btn" style="width: 900px;">
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="margin-bottom: 10px;margin-left: 700px;">
             End practicing
@@ -126,7 +126,7 @@
           </div>
           </div>
           </div>
-          <form action="{% url 'home' %}" method="POST">
+          <form action="{% url 'home' %}" method="POST" id="sub_ans">
           {% if question %}
           <div class="card" style="width: 70rem;border :2px solid green">
             <strong class="card-header" style="background-color: rgba(67, 97, 219, 0.454);">Question</strong>
@@ -155,13 +155,13 @@
               </div>
               <!--card footer btn-->
               <div class="card-footer">
-                <button type="button" class="feedback"  >Feedback</button>
-                <button type="submit" class="suggrstedans" name="action" value="sug_ans" >Suggested Answere</button>
+                <button type="button" class="feedback"  id="feedback_area">Feedback</button>
+                <button type="submit" class="suggrstedans" name="action" value="sug_ans" id="answer_area">Suggested Answere</button>
               </div>
             </div>
           </div>
            <!--feedback card-->
-          <div class="card" style="width: 70rem; display: block; " id="feedback-card" >
+          <div class="card" style="width: 70rem; display: none; " id="feedback-card" >
               <strong class="card-header" style=" background-color: rgba(97, 204, 240, 0.514);">Feedback</strong>
               <div class="Feedback">
               <div class="card-body">
@@ -170,7 +170,7 @@
              </div>
           </div>
           <!--answere card-->
-          <div class="card" style="width: 70rem; display: block;" id="answer-card">
+          <div class="card" style="width: 70rem; display: none;" id="answer-card">
             <strong class="card-header" style=" background-color: rgba(97, 204, 240, 0.413);">Suggested Answere</strong>
             <div class="card-body">
               <p class="card-text"><strong>{{ suggested_ans }}</strong></p>
@@ -178,9 +178,8 @@
           </div>
           <!--ans submit button and next question button-->
           <div class="ans_submit" style="margin-top:30px;margin-bottom: 30px;  ">
-            <button type="submit" name="action" value="submit_answer" class="sub_btn_ans" id="sub" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); " >Submit for AI Feedback</button>
-            <button type="submit" name="action" value="generate_next" class="sub_btn_ans" id="next" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); display: flex;" >Next Question</button>
-            
+            <button type="submit" name="action" value="submit_answer" class="sub_btn_ans" id="sub" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); "  >Submit for AI Feedback</button>
+            <button type="submit" name="action" value="generate_next" class="sub_btn_ans" id="next" style="padding: 10px;color:white;background-color: rgba(69, 69, 238, 0.616); display: flex;"  >Next Question</button>
           {% endif %}
         </form>
           </div>
@@ -188,7 +187,7 @@
      </section>
       <script src="{% static 'js/home.js' %}"></script>
    
-      <!-- </div>-->
+      <!--</div>-->
     
     <div class="container" id="container">
       <section id="ABOUT">
@@ -384,6 +383,31 @@
         function practice_done() {
             window.location.href = "home.html";
         }
+      </script>
+      <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var domainSelect = document.querySelector(".domain");  // Selecting by class
+    var jobDescriptionField = document.querySelector(".job_description");  // Selecting job description field
+
+    if (domainSelect && jobDescriptionField) {
+        domainSelect.addEventListener('change', function () {
+            var domain = this.value.trim();
+            if (domain) {
+                fetch(`/get_job_description/?domain=${encodeURIComponent(domain)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        jobDescriptionField.value = data.job_description || "No description available.";
+                    })
+                    .catch(error => console.error("Error fetching job description:", error));
+            } else {
+                jobDescriptionField.value = "";
+            }
+        });
+    } else {
+        console.error("Dropdown or job description field not found!");
+    }
+});
+
       </script>
     </body>
 </html>

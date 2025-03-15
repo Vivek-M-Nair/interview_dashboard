@@ -182,6 +182,7 @@ Question_Generator=pipeline('text2text-generation',model="google/flan-t5-large")
 Answer_generator=pipeline('text2text-generation',model="google/flan-t5-large")
 Feedback_generator=pipeline('text-classification',model="distilbert-base-uncased-finetuned-sst-2-english")
 def home(request):
+    
     AnswerForm=Ans_Form()
     DetailsForm=Job_Details()
     practice=None
@@ -192,10 +193,19 @@ def home(request):
             if DetailsForm.is_valid():
                 domain=DetailsForm.cleaned_data['domain']
                 job_description=DetailsForm.cleaned_data['description']
+                request.session['domain']=domain
+                request.session['job_description']=job_description
                 prompt=f"Generate a technical interview question for a {domain} role. The job involves: {job_description}"
                 question_output=Question_Generator(prompt,max_length=50,do_sample=True,temperature=0.7,top_p=0.9,num_return_sequences=1)[0]['generated_text']
                 practice=interviewprep.objects.create(domain=domain,description=job_description,question=question_output.strip())
                 practice.save()
+        elif action=="generate_next":
+            domain=request.session.get('domain')
+            job_description=request.session.get('job_description')
+            prompt=f"Generate a technical interview question for a {domain} role. The job involves: {job_description}"
+            question_output=Question_Generator(prompt,max_length=50,top_p=0.9,temperature=0.7,do_sample=50,num_return_sequences=1)[0]['generated_text']
+            practice=interviewprep.objects.create(domain=domain,description=job_description,question=question_output.strip())
+            practice.save()
         elif action == "submit_answer":#submit for AI feedback answer
                 practice_id=request.POST.get('practice_id')
                 practice=get_object_or_404(interviewprep,id=practice_id)
@@ -226,4 +236,18 @@ def home(request):
                                        "suggested_ans":practice.suggested_answer if practice is not None else '',
                                        "feedback":practice.feedback if practice is not None else '',
                                        "DetailsForm":DetailsForm,"AnswereForm":AnswerForm,
-                                       "question":practice.question if practice is not None else ''})
+                                       "question":practice.question if practice is not None else ''}) 
+
+from .models import Job
+from django.http import JsonResponse
+from django.core.exceptions import ObjectDoesNotExist
+def get_job_description(request):
+    domain=request.GET.get('domain')
+    if domain:
+        try:
+           job=Job.objects.get(job_title=domain)
+           return JsonResponse({'job_description':job.job_description})
+        except ObjectDoesNotExist:
+            return JsonResponse({'error': 'Job description not found for this domain'}, status=404)
+    else:
+        return JsonResponse({'error': 'No domain provided'}, status=400)
