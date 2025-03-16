@@ -45,19 +45,16 @@ class Job_Details(forms.ModelForm):
     # Job_Field=[("software Engineering","Software Engineering"),
     #            ("Data Science","Data Science")]
     domain=forms.ChoiceField(
-        choices=[(job.job_title,job.job_title) for job in Job.objects.all()]
-
+        choices=[(job.job_title,job.job_title) for job in Job.objects.all()],
+        widget=forms.Select(attrs={'class':'domain'}),
     )
     
     class Meta:
         model=interviewprep
         fields=['domain','description']
-        widgets={'domain':forms.Select(attrs={'class':'domain'}),
+        widgets={
                  'description':forms.Textarea(attrs={'class':'job_description', 'placeholder':'Your Job Description'})
                  }
-        labels={
-            'domain':"select a domain"
-        }
   #forms.TextInput - Charfeild
 class Ans_Form(forms.ModelForm):
     class Meta:

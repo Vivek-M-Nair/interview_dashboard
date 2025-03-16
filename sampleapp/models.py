@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 class contact_for(models.Model):
     first_name=models.TextField(max_length=100)
     email=models.CharField(max_length=100)
@@ -22,7 +23,7 @@ class Job(models.Model):
         return self.job_title
 
 class interviewprep(models.Model):
-    user=models.TextField()
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
     domain=models.CharField(max_length=50)
     description=models.TextField()
     user_ans=models.TextField()
@@ -30,3 +31,11 @@ class interviewprep(models.Model):
     suggested_answer=models.TextField()
     feedback=models.TextField()
     created_at=models.DateTimeField(auto_now_add=True)
+
+class Personality(models.Model):
+    user=models.OneToOneField(User,on_delete=models.CASCADE)
+    openness=models.IntegerField()
+    conscientiousness=models.IntegerField()
+    extraversion=models.IntegerField()
+    agreeableness=models.IntegerField()
+    neuroticism=models.IntegerField()

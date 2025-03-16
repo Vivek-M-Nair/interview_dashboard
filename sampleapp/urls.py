@@ -9,5 +9,6 @@ urlpatterns=[
     path('log_reg/',views.log_reg,name='log_reg'),
     path('logout_view/',views.logout_view,name="logout_view"),
     path('home/',views.home,name='home'),
-    path('get_job_description/',views.get_job_description,name='get_job_description')
+    path('get_job_description/',views.get_job_description,name='get_job_description'),
+    path('personality_analysis/',views.personality_analysis,name='personality_analysis')
 ]

@@ -2,8 +2,10 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.contrib.auth import authenticate,login,logout
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 # from .models import cont
 from .forms import contacts
+import random
 # from django.http import HttpResponse
 def about(request):
     return render(request,'about.html')
@@ -181,6 +183,8 @@ from .forms import Ans_Form
 Question_Generator=pipeline('text2text-generation',model="google/flan-t5-large")
 Answer_generator=pipeline('text2text-generation',model="google/flan-t5-large")
 Feedback_generator=pipeline('text-classification',model="distilbert-base-uncased-finetuned-sst-2-english")
+
+@login_required
 def home(request):
     
     AnswerForm=Ans_Form()
@@ -197,7 +201,7 @@ def home(request):
                 request.session['job_description']=job_description
                 prompt=f"Generate a technical interview question for a {domain} role. The job involves: {job_description}"
                 question_output=Question_Generator(prompt,max_length=50,do_sample=True,temperature=0.7,top_p=0.9,num_return_sequences=1)[0]['generated_text']
-                practice=interviewprep.objects.create(domain=domain,description=job_description,question=question_output.strip())
+                practice=interviewprep.objects.create(user=request.user,domain=domain,description=job_description,question=question_output.strip())
                 practice.save()
         elif action=="generate_next":
             domain=request.session.get('domain')
@@ -251,3 +255,58 @@ def get_job_description(request):
             return JsonResponse({'error': 'Job description not found for this domain'}, status=404)
     else:
         return JsonResponse({'error': 'No domain provided'}, status=400)
+    
+from .models import Personality
+import json
+personality_analysor=pipeline('text-classification',model="google/flan-t5-large")
+@login_required
+def personality_analysis(request):
+    summary_data=interviewprep.objects.filter(user=request.user).values(
+        "id", "created_at", "question", "user_ans", "suggested_answer"
+    ) 
+    summary_list = list(summary_data)
+
+    # Convert datetime fields to strings
+    for item in summary_list:
+        item["created_at"] = item["created_at"].strftime("%Y-%m-%d %H:%M:%S")  # Convert to string format
+
+    summary_json = json.dumps(summary_list)
+    if not summary_data:
+        messages.error('request','Sorry,no summary Found!')
+        return redirect("personality_analysis")
+    answers=interviewprep.objects.filter(user=request.user,user_ans__isnull=False)
+    if not answers:
+        messages.error(request,'No response available')
+        return redirect("personality_analysis")
+    traits={
+        "openness":50,
+        "conscientiousness":50,
+        "extraversion":50,
+        "agreeableness":50,
+        "neuroticism":50
+    }
+    for response in answers:
+        answer=response.user_ans.lower()  #.user_ans because response is an obj but we need string (not sure)
+        sentiment=personality_analysor(answer)[0]
+
+        if any(word in answer for word in ["creative","innovative","imaginative","visionary","inventive","artistic"]):
+            traits['openness'] += random.randint(5,10)
+        if any(word in answer for word in ["organized","structured","methodical","systematic","precise","detail-oriented","thorough"]):
+            traits['conscientiousness'] += random.randint(5,10)
+        if any(word in answer for word in ["sociable","outgoing","friendly","talkative","gregarious","approachable","carismatic"]):
+            traits['extraversion'] += random.randint(5,10)
+        if any(word in answer for word in ["kind","caring","compassionate","warm","gentle","generous","nurturing"]):
+            traits['agreeableness'] += random.randint(5,10)
+        if sentiment['label']=="NEGATIVE":       
+            traits["neuroticism"] += random.randint(5,10)
+    
+    for key in traits:
+        traits[key]=max(0,min(traits[key],100))
+
+    personality,object=Personality.objects.update_or_create(
+        user=request.user,
+        defaults=traits
+    )
+
+    return render(request,"summary.html",{"traits":json.dumps(traits), "summary":summary_json})
+

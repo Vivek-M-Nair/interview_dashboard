@@ -27,11 +27,11 @@
                     <a class="nav-link" href="#cont" >Contact Us</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="/html_codes/summary.html">Summary</a>
+                    <a class="nav-link" href="{% url 'personality_analysis' %}">Summary</a>
                   </li>
                   <li class="nav-item">
-                    <a class="nav-link" href="/html_codes/log_reg.html">Login</a>
-                    <a class="nav-link" href="/html_codes/log_reg.html" style="display: none;">Log out</a>
+                    <a class="nav-link" href="{% url 'log_reg' %}" id="login">Login</a>
+                    <a class="nav-link" href="/html_codes/log_reg.html" style="display: none;" id="logout">Log out</a>
                   </li>
               </div>
             </div>
@@ -95,7 +95,7 @@
       </form>
       <!--area in which quesrion,feedback and sugested ans is shown this area appears only if btn-generate question is clicked-->
      <section id="area"><!--section of area-->
-        <div class="main_area" id="main_area"style="display: none;">
+        <div class="main_area" id="main_area"style="display: block;">
           <div class="stop_btn" style="width: 900px;">
           <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop" style="margin-bottom: 10px;margin-left: 700px;">
             End practicing
@@ -161,7 +161,7 @@
             </div>
           </div>
            <!--feedback card-->
-          <div class="card" style="width: 70rem; display: none; " id="feedback-card" >
+          <div class="card" style="width: 70rem; display: block; " id="feedback-card" >
               <strong class="card-header" style=" background-color: rgba(97, 204, 240, 0.514);">Feedback</strong>
               <div class="Feedback">
               <div class="card-body">
@@ -170,7 +170,7 @@
              </div>
           </div>
           <!--answere card-->
-          <div class="card" style="width: 70rem; display: none;" id="answer-card">
+          <div class="card" style="width: 70rem; display: block;" id="answer-card">
             <strong class="card-header" style=" background-color: rgba(97, 204, 240, 0.413);">Suggested Answere</strong>
             <div class="card-body">
               <p class="card-text"><strong>{{ suggested_ans }}</strong></p>
@@ -385,29 +385,25 @@
         }
       </script>
       <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var domainSelect = document.querySelector(".domain");  // Selecting by class
-    var jobDescriptionField = document.querySelector(".job_description");  // Selecting job description field
-
-    if (domainSelect && jobDescriptionField) {
-        domainSelect.addEventListener('change', function () {
-            var domain = this.value.trim();
-            if (domain) {
-                fetch(`/get_job_description/?domain=${encodeURIComponent(domain)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        jobDescriptionField.value = data.job_description || "No description available.";
-                    })
-                    .catch(error => console.error("Error fetching job description:", error));
-            } else {
-                jobDescriptionField.value = "";
-            }
-        });
-    } else {
-        console.error("Dropdown or job description field not found!");
-    }
-});
-
+        document.querySelector(".domain").addEventListener('change',function(){
+        const domain=this.value.trim();
+        const job_description=document.querySelector(".job_description")
+        if(domain)
+        {
+          fetch(`/get_job_description/?domain=${encodeURIComponent(domain)}`)
+          .then(response=>response.json())
+          .then(data=>{
+            job_description.value=data.job_description;
+          });
+        }
+        else{
+          job_description.value="";
+        }
+      });
+      </script>
+      <script>
+        var log=document.getElementById('login')
+        var log_out=document.getElementById('logout')
       </script>
     </body>
 </html>
